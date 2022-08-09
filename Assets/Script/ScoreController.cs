@@ -29,6 +29,8 @@ public class ScoreController : MonoBehaviour
     public int humanKilled;
     private int m_humanKilled;
 
+    private bool isAnimating;
+
     private void Start()
     {
         score = 0;
@@ -53,15 +55,28 @@ public class ScoreController : MonoBehaviour
         enemyKilledStats.text = enemyKilled.ToString();
         humanKilledStats.text = "Killed: " + humanKilled.ToString();
         humanSavedStats.text = "Saved: " + humanSaved.ToString();
+
+        isAnimating = false;
     }
 
 
     private void Update()
     {
+        if (isAnimating) return;
         if(m_score != score)
         {
-            scoreboard.text = Converter(score);
-            m_score = score;
+            isAnimating = true;
+            LeanTween.value(m_score, score, .5f)
+                .setOnUpdate((float val) =>
+                {
+                    scoreboard.transform.localScale = new Vector3(1.2f, 1.2f, 1);
+                    scoreboard.text = Converter(Mathf.FloorToInt(val));
+                })
+                .setOnComplete(() => {
+                    m_score = score;
+                    scoreboard.transform.localScale = new Vector3(1, 1, 1);
+                    isAnimating = false;
+                });
         }
 
         if(playerLives != m_playerLives)

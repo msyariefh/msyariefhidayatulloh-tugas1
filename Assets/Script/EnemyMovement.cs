@@ -40,7 +40,7 @@ public class EnemyMovement : MonoBehaviour
 
     private void MovingDown()
     {
-        transform.Translate(direction * Time.deltaTime * GM.enemySpeed);
+        transform.Translate(direction * Time.deltaTime * (GM.enemySpeed + .2f * GM.waveTotal/5.0f));
     }
 
     
