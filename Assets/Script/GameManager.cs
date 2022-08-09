@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,14 +27,36 @@ public class GameManager : MonoBehaviour
     [Range(1, 10)] public int totalEnemyToBeSpawned;
 
     [Header("UI")]
+    public int maxLives;
     public ScoreController ScoringUI;
     public GameObject PauseCanvas;
     public GameObject GameOverCanvas;
+    [HideInInspector] public int waveTotal = 0;
 
     public void AddScore(int addition)
     {
         if (addition < 0 && ScoringUI.score <= 0) return;
         ScoringUI.score += addition;
+    }
+
+    public void ChangeLives(int change)
+    {
+        ScoringUI.playerLives += change;
+    }
+
+    public void AddEnemyKilled()
+    {
+        ScoringUI.enemyKilled ++;
+    }
+
+    public void AddHumanKilled()
+    {
+        ScoringUI.humanKilled++;
+    }
+
+    public void AddHumanSaved()
+    {
+        ScoringUI.humanSaved++;
     }
 
     private void Update()
@@ -53,6 +76,10 @@ public class GameManager : MonoBehaviour
             {
                 Pause();
             }
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(isOver || isPause) MainMenu();
         }
     }
 

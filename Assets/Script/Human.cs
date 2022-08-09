@@ -16,12 +16,14 @@ public class Human : MonoBehaviour
         if (collision.CompareTag("Player Area"))
         {
             GM.AddScore(50);
+            GM.AddHumanSaved();
             Destroy(gameObject);
         }
 
         if (collision.CompareTag("Enemy"))
         {
             GM.AddScore(-5);
+            GM.AddHumanKilled();
             Destroy(gameObject);
         }
     }

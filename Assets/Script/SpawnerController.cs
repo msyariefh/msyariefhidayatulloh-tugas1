@@ -25,14 +25,19 @@ public class SpawnerController : MonoBehaviour
 
     private void Update()
     {
-        if (isSpawning == false) StartCoroutine(Spawn(coolDownTime));
+        if (isSpawning == false && !GM.isPause && !GM.isOver)
+        {
+            spawnNumber = GM.totalEnemyToBeSpawned + Mathf.FloorToInt(GM.waveTotal/10);
+            coolDownTime = GM.cooldown + Mathf.FloorToInt(GM.waveTotal/10);
+            StartCoroutine(Spawn(coolDownTime));
+        }
+        
     }
     private IEnumerator Spawn(float cd)
     {
         isSpawning = true;
-        // Decide which row to go
-        int row = Random.Range(0, spawnerLocation.Length);
-
+        GM.waveTotal += 1;
+        
         int count = 0;
         while(count < spawnNumber)
         {
@@ -40,6 +45,8 @@ public class SpawnerController : MonoBehaviour
             //Spawn
             // Decide which object to be spawned
             int objIndex = Random.Range(0, objectToBeSpawned.Length);
+            // Decide which row to go
+            int row = Random.Range(0, spawnerLocation.Length);
 
             if (!GM.isPause)
             {
@@ -50,7 +57,7 @@ public class SpawnerController : MonoBehaviour
             count++;
         }
 
-        yield return new WaitForSeconds(cd / (spawnNumber - 1));
+        yield return new WaitForSeconds(cd / (spawnNumber - 2));
         isSpawning = false;
     }
 
