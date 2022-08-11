@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using HiDE.ZombieTap.Inputs;
 using HiDE.ZombieTap.Character;
+using HiDE.ZombieTap.Spawner;
+using UnityEngine.UI;
 
 namespace HiDE.ZombieTap.UI
 {
@@ -12,6 +14,9 @@ namespace HiDE.ZombieTap.UI
         [SerializeField] private TMP_Text waveInfo;
         [SerializeField] private TMP_Text enemyKilledStats;
         [SerializeField] private TMP_Text humanSavedStats;
+        [SerializeField] private GameObject gameOverPage;
+
+        [SerializeField] private Slider slider;
 
         private int killedZombieCounter;
         private int savedHumanCounter;
@@ -29,6 +34,11 @@ namespace HiDE.ZombieTap.UI
             GameController.OnChangeScore += OnScoreChanged;
             GameController.OnChangeHeart += OnHeartChanged;
             GameController.OnChangeWave += OnWaveChanged;
+            GameController.OnGameOver += OnGameOver;
+
+            ObjectFactory.OnWaveStarted += OnWaveStarted;
+            ObjectFactory.OnWaveSpawn += OnWaveSpawned;
+
             ZombieCharacter.OnEnemyTapped += OnEnemyTapped;
             SpecialZombieCharacter.OnEnemyTapped += OnEnemyTapped;
             HumanCharacter.OnHumanPassed += OnHumanPassed;
@@ -59,6 +69,25 @@ namespace HiDE.ZombieTap.UI
             humanSavedStats.text = savedHumanCounter.ToString();
         }
 
+        private void OnWaveStarted(int spawnNumber)
+        {
+            slider.maxValue = spawnNumber;
+            if (slider.value != spawnNumber) slider.value = spawnNumber;
+            LeanTween.value(slider.value, spawnNumber, .75F)
+                .setOnUpdate((float val) => slider.value = val);
+        }
+
+        private void OnWaveSpawned(int running)
+        {
+            LeanTween.value(slider.value, running, .5f)
+                .setOnUpdate((float val) => slider.value = val);
+        }
+
+        private void OnGameOver()
+        {
+            gameOverPage.SetActive(true);
+            Time.timeScale = 0;
+        }
 
         private string Converter(int num)
         {

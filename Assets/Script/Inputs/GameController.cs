@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using HiDE.ZombieTap.Spawner;
 using HiDE.ZombieTap.Character;
+using UnityEngine.SceneManagement;
 
 namespace HiDE.ZombieTap.Inputs
 {
@@ -16,6 +17,9 @@ namespace HiDE.ZombieTap.Inputs
 
         public delegate void ChangeHeart(int heart);
         public static event ChangeHeart OnChangeHeart;
+
+        public delegate void GameOverAction();
+        public static event GameOverAction OnGameOver;
 
         private int waveNumber = 1;
         private int _waveNumber = 1;
@@ -58,12 +62,13 @@ namespace HiDE.ZombieTap.Inputs
 
             if(currentHeart != _currentHeart)
             {
+                OnChangeHeart?.Invoke(currentHeart);
                 if (currentHeart <= 0)
                 {
-                    //Dead
+                    GameOver();
                     return;
                 }
-                OnChangeHeart?.Invoke(currentHeart);
+                
                 _currentHeart = currentHeart;
             }
         }
@@ -78,7 +83,7 @@ namespace HiDE.ZombieTap.Inputs
         }
         private void OnEnemyPassed()
         {
-            currentHeart--;
+            currentHeart -= 1;
         }
         private void AddScore(int num)
         {
@@ -87,7 +92,19 @@ namespace HiDE.ZombieTap.Inputs
 
         private void GameOver()
         {
+            OnGameOver?.Invoke();
+        }
 
+        public void RestartGame()
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(1);
+        }
+
+        public void MainMenu()
+        {
+            Time.timeScale = 1;
+            SceneManager.LoadScene(0);
         }
     }
 }

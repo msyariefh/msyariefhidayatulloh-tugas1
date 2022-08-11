@@ -17,7 +17,7 @@ namespace HiDE.ZombieTap.Character
         protected virtual void Update()
         {
             Move();
-            if (transform.position.y <= yLimit) DestroyObject();
+            if (transform.position.y <= yLimit) OnBorderPassed();
         }
         private void Move()
         {

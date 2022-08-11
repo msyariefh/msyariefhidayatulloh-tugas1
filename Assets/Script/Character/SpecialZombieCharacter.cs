@@ -22,6 +22,7 @@ namespace HiDE.ZombieTap.Character
         protected override void OnBorderPassed()
         {
             OnEnemyPassed?.Invoke();
+            DestroyObject();
         }
 
         protected override void OnTapped()

@@ -16,6 +16,8 @@ namespace HiDE.ZombieTap.Spawner
 
         public delegate void WaveStart(int totalSpawn);
         public static event WaveStart OnWaveStarted;
+        public delegate void WaveSpawn(int running);
+        public static event WaveSpawn OnWaveSpawn;
         public delegate void WaveComplete();
         public static event WaveComplete OnWaveCompleted;
 
@@ -42,7 +44,7 @@ namespace HiDE.ZombieTap.Spawner
             int keeper = 0;
             while (keeper < spawningNumber)
             {
-                
+                yield return new WaitForSeconds(cooldown / (spawningNumber - 1));
                 CharacterObject co = characters[Random.Range(0, characters.Length)];
                 Vector3 pos = spawnPoints[Random.Range(0, spawnPoints.Length)].position;
 
@@ -66,10 +68,11 @@ namespace HiDE.ZombieTap.Spawner
                     }
                     
                 }
+                OnWaveSpawn?.Invoke(spawningNumber - (keeper + 1));
                 
-                yield return new WaitForSeconds(cooldown / (spawningNumber - 1));
+                keeper++;
             }
-            yield return new WaitForSeconds(cooldown / (spawningNumber - 2));
+            yield return new WaitForSeconds(cooldown/3);
             OnWaveCompleted?.Invoke();
         }
 
