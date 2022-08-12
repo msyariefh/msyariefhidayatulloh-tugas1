@@ -12,7 +12,7 @@ namespace HiDE.ZombieTap.Inputs
         public delegate void ChangeWaveAction(int wave);
         public static event ChangeWaveAction OnChangeWave;
 
-        public delegate void ChangeScoreAction(int score);
+        public delegate void ChangeScoreAction(int scoreBefore, int scoreAfter);
         public static event ChangeScoreAction OnChangeScore;
 
         public delegate void ChangeHeart(int heart);
@@ -31,6 +31,13 @@ namespace HiDE.ZombieTap.Inputs
 
         private void Start()
         {
+           
+
+            currentHeart = maxHeart;
+            _currentHeart = currentHeart;
+        }
+        private void OnEnable()
+        {
             ObjectFactory.OnWaveStarted += OnWaveStarted;
             ObjectFactory.OnWaveCompleted += OnWaveCompleted;
 
@@ -41,9 +48,21 @@ namespace HiDE.ZombieTap.Inputs
 
             HumanCharacter.OnHumanPassed += AddScore;
             HumanCharacter.OnHumanTapped += GameOver;
+            HumanCharacter.OnHumanKilled += AddScore;
+        }
+        private void OnDestroy()
+        {
+            ObjectFactory.OnWaveStarted -= OnWaveStarted;
+            ObjectFactory.OnWaveCompleted -= OnWaveCompleted;
 
-            currentHeart = maxHeart;
-            _currentHeart = currentHeart;
+            ZombieCharacter.OnEnemyPassed -= OnEnemyPassed;
+            SpecialZombieCharacter.OnEnemyPassed -= OnEnemyPassed;
+            ZombieCharacter.OnEnemyTapped -= AddScore;
+            SpecialZombieCharacter.OnEnemyTapped -= AddScore;
+
+            HumanCharacter.OnHumanPassed -= AddScore;
+            HumanCharacter.OnHumanTapped -= GameOver;
+            HumanCharacter.OnHumanKilled -= AddScore;
         }
 
         private void Update()
@@ -56,7 +75,7 @@ namespace HiDE.ZombieTap.Inputs
 
             if(score != _score)
             {
-                OnChangeScore?.Invoke(score);
+                OnChangeScore?.Invoke(_score, score);
                 _score = score;
             }
 
@@ -73,7 +92,7 @@ namespace HiDE.ZombieTap.Inputs
             }
         }
 
-        private void OnWaveStarted(int totalSpawned)
+        private void OnWaveStarted(int totalSpawned, int waveNum)
         {
             //Do something to UI when new wave started
         }

@@ -14,20 +14,25 @@ namespace HiDE.ZombieTap.Spawner
         [SerializeField] private float initialSpawnCooldown;
         [SerializeField] private int initialNumberSpawning;
 
-        public delegate void WaveStart(int totalSpawn);
+        public delegate void WaveStart(int totalSpawn, int waveNumber);
         public static event WaveStart OnWaveStarted;
         public delegate void WaveSpawn(int running);
         public static event WaveSpawn OnWaveSpawn;
         public delegate void WaveComplete();
         public static event WaveComplete OnWaveCompleted;
 
-        private void Awake()
+        private void OnEnable()
         {
-            characterPools = new List<CharacterObject>();
+            GameController.OnChangeWave += OnSpawnNewWave;
+        }
+        private void OnDestroy()
+        {
+            GameController.OnChangeWave -= OnSpawnNewWave;
         }
         private void Start()
         {
-            GameController.OnChangeWave += OnSpawnNewWave;
+            characterPools = new List<CharacterObject>();
+            
             OnSpawnNewWave(1);
         }
 
@@ -40,7 +45,7 @@ namespace HiDE.ZombieTap.Spawner
         {
             int spawningNumber = initialNumberSpawning + Mathf.FloorToInt(wave / 5);
             float cooldown = initialSpawnCooldown + Mathf.FloorToInt(0.8f * wave / 5);
-            OnWaveStarted?.Invoke(spawningNumber);
+            OnWaveStarted?.Invoke(spawningNumber, wave);
             int keeper = 0;
             while (keeper < spawningNumber)
             {
@@ -72,7 +77,7 @@ namespace HiDE.ZombieTap.Spawner
                 
                 keeper++;
             }
-            yield return new WaitForSeconds(cooldown/3);
+            yield return new WaitForSeconds(2f);
             OnWaveCompleted?.Invoke();
         }
 

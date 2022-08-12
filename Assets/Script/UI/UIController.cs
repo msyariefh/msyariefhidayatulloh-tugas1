@@ -20,20 +20,24 @@ namespace HiDE.ZombieTap.UI
 
         private int killedZombieCounter;
         private int savedHumanCounter;
+        private bool isAnimatingScore;
 
         private void Start()
         {
             scoreboard.text = Converter(0);
             liveboard.text = "3";
-            waveInfo.text = "1";
 
             killedZombieCounter = 0;
             savedHumanCounter = 0;
 
+            isAnimatingScore = false;
+        }
+        private void OnEnable()
+        {
             //Events
             GameController.OnChangeScore += OnScoreChanged;
             GameController.OnChangeHeart += OnHeartChanged;
-            GameController.OnChangeWave += OnWaveChanged;
+            //GameController.OnChangeWave += OnWaveChanged;
             GameController.OnGameOver += OnGameOver;
 
             ObjectFactory.OnWaveStarted += OnWaveStarted;
@@ -44,20 +48,56 @@ namespace HiDE.ZombieTap.UI
             HumanCharacter.OnHumanPassed += OnHumanPassed;
         }
 
-        
-
-        private void OnScoreChanged(int score)
+        private void OnDestroy()
         {
-            scoreboard.text = Converter(score);
+            //Events
+            GameController.OnChangeScore -= OnScoreChanged;
+            GameController.OnChangeHeart -= OnHeartChanged;
+            //GameController.OnChangeWave -= OnWaveChanged;
+            GameController.OnGameOver -= OnGameOver;
+
+            ObjectFactory.OnWaveStarted -= OnWaveStarted;
+            ObjectFactory.OnWaveSpawn -= OnWaveSpawned;
+
+            ZombieCharacter.OnEnemyTapped -= OnEnemyTapped;
+            SpecialZombieCharacter.OnEnemyTapped -= OnEnemyTapped;
+            HumanCharacter.OnHumanPassed -= OnHumanPassed;
+        }
+
+
+        private void OnScoreChanged(int scoreBefore, int scoreAfter)
+        {
+            int score = scoreAfter;
+            int _score = scoreBefore;
+            if (scoreAfter < 0) score = 0;
+            if (scoreBefore < 0) _score = 0;
+            if (isAnimatingScore)
+            {
+                scoreboard.text = Converter(score);
+                return;
+            }
+            isAnimatingScore = true;
+            LeanTween.value(_score, score, .5f)
+                .setOnUpdate((float val) =>
+                {
+                    scoreboard.transform.localScale = new Vector3(1.2f, 1.2f, 1);
+                    scoreboard.text = Converter(Mathf.FloorToInt(val));
+                })
+                .setOnComplete(() => 
+                {
+                    scoreboard.transform.localScale = new Vector3(1, 1, 1);
+                    isAnimatingScore = false;
+                });
+      
         }
         private void OnHeartChanged(int heart)
         {
             liveboard.text = heart.ToString();
         }
-        private void OnWaveChanged(int wave)
-        {
-            waveInfo.text = wave.ToString();
-        }
+        //private void OnWaveChanged(int wave)
+        //{
+        //    waveInfo.text = "Wave "+ wave.ToString();
+        //}
         private void OnEnemyTapped(int score)
         {
             killedZombieCounter++;
@@ -69,10 +109,11 @@ namespace HiDE.ZombieTap.UI
             humanSavedStats.text = savedHumanCounter.ToString();
         }
 
-        private void OnWaveStarted(int spawnNumber)
+        private void OnWaveStarted(int spawnNumber, int waveNumber)
         {
+            print(waveNumber);
+            waveInfo.text = "Wave " + waveNumber.ToString();
             slider.maxValue = spawnNumber;
-            if (slider.value != spawnNumber) slider.value = spawnNumber;
             LeanTween.value(slider.value, spawnNumber, .75F)
                 .setOnUpdate((float val) => slider.value = val);
         }
